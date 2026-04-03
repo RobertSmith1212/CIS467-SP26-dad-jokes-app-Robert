@@ -118,7 +118,7 @@ app.post("/api/jokes", async (req: Request, res: Response) => {
   }
 });
 
-// --- PATCH /api/jokes/:id/rate – rate a joke ------------------------------
+// --- /api/jokes/:id/rate – rate a joke ------------------------------
 app.patch("/api/jokes/:id/rate", async (req: Request, res: Response) => {
   try {
     const { rating } = req.body;
