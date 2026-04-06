@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import { Pool } from "pg";
+import { readFileSync } from "fs";
 
 // ---------------------------------------------------------------------------
 // Database connection
@@ -9,9 +10,10 @@ const pool = new Pool({
   host: process.env.DB_HOST || "localhost",
   port: Number(process.env.DB_PORT) || 5432,
   user: process.env.DB_USER || "dadjokes",
-  password: process.env.DB_PASSWORD || "dadjokes",
+  password: readFileSync(process.env.DB_PASSWORD_FILE || "", "utf8").trim(),
   database: process.env.DB_NAME || "dadjokes",
 });
+
 
 // Simple retry loop – the API container often starts before Postgres is ready.
 async function waitForDb(retries = 10, delay = 3000): Promise<void> {
