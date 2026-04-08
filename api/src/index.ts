@@ -1,7 +1,11 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import { Pool } from "pg";
-import { readFileSync } from "fs";
+import { readFileSync} from "fs";
+import fs from "fs"
+import { Resend } from 'resend';
+
+const resend = new Resend(fs.readFileSync(process.env.RESEND_API_KEY_FILE || "", 'utf8').trim());
 
 // ---------------------------------------------------------------------------
 // Database connection
@@ -84,8 +88,30 @@ app.get("/api/jokes/random", async (_req: Request, res: Response) => {
   }
 });
 
+app.post('/api/jokes/email', async (req, res) => {
+  console.log('HIT /email route');  // ← add this
+  const { to, joke } = req.body;
+  try {
+    await resend.emails.send({
+      from: 'onboarding@resend.dev',
+      to: "robert.smith@students.fhu.edu",
+      subject: '😂 A Dad Joke For You!',
+      html: `<h2>${joke}</h2>`
+    });
+    res.json({ success: true });
+      } catch (err) {
+        console.error('Resend error:', err);
+        res.status(500).json({ error: 'Failed to send email' });
+  }
+});
+
 // --- GET /api/jokes/:id ---------------------------------------------------
 app.get("/api/jokes/:id", async (req: Request, res: Response) => {
+  const id = parseInt(req.params.id as string);
+  if (isNaN(id)) {
+    res.status(400).json({ error: "Invalid joke ID" });
+    return;
+  }
   try {
     const result = await pool.query("SELECT * FROM jokes WHERE id = $1", [
       req.params.id,

@@ -136,3 +136,7 @@ npm run dev
 # Note: Vite proxies /api to http://api:3000 by default.
 # For local dev, change the proxy target in vite.config.ts to http://localhost:3000.
 ```
+
+
+``` THINGS I ADDED ```
+``` I added pgadmin, and the ability to send emails with the current joke to someone, right now it only goes to me ```

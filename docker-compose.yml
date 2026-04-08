@@ -6,12 +6,14 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgres/data
+      - pgdata:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       POSTGRES_USER: dadjokes
-      DB_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       POSTGRES_DB: dadjokes
+    secrets:
+      - postgres_password
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U dadjokes"]
       interval: 5s
@@ -31,8 +33,10 @@ services:
       DB_USER: dadjokes
       DB_PASSWORD_FILE: /run/secrets/postgres_password
       DB_NAME: dadjokes
+      RESEND_API_KEY_FILE: /run/secrets/resend_APIKey
     secrets:
         - postgres_password
+        - resend_APIKey
     depends_on:
       db:
         condition: service_healthy
@@ -82,10 +86,30 @@ services:
         - path: ./frontend/package-lock.json
           target: /app/package-lock.json
           action: rebuild
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/pgadmin_password
+    secrets:
+      - pgadmin_password
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+      
 
 secrets:
   postgres_password:
     file: ./secrets/POSTGRES_PASSWORD.txt
+  pgadmin_password:
+    file: ./secrets/PGADMIN_PASSWORD.txt
+  pgadmin_email:
+    file: ./secrets/PGADMIN_EMAIL.txt
+  resend_APIKey:
+    file: ./secrets/RESEND_APIKEY.txt
 
 volumes:
   pgdata:
